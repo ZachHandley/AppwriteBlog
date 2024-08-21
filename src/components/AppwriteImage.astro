@@ -1,0 +1,20 @@
+---
+import { getFileViewUrl } from "appwrite-utils";
+import appwriteConfig from "@appwrite/appwriteConfig";
+
+const { appwriteEndpoint, appwriteProject, databases } = appwriteConfig;
+
+const bucketId = databases[0].bucket?.$id!;
+
+interface Props {
+  id: string;
+  alt?: string;
+}
+
+const { id, alt = "A featured blog image" } = Astro.props;
+---
+
+<img
+  src={getFileViewUrl(appwriteEndpoint, appwriteProject, bucketId, id)}
+  alt={alt}
+/>

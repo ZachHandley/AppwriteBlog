@@ -1,0 +1,35 @@
+---
+import BlogPost from "../../layouts/BlogPost.astro";
+import { Client, Databases, Query, type Models } from "appwrite";
+import appwriteConfig from "@appwrite/appwriteConfig";
+import Post from "@appwrite/collections/Post";
+import { PostSchema } from "@appwrite/schemas/post";
+
+const { appwriteEndpoint, appwriteProject, databases } = appwriteConfig;
+
+export async function getStaticPaths() {
+  const client = new Client()
+    .setEndpoint(appwriteEndpoint)
+    .setProject(appwriteProject);
+
+  const db = new Databases(client);
+
+  const allPostsResp: Models.DocumentList<Models.Document> =
+    await db.listDocuments(databases[0].$id, Post.$id!, [
+      Query.equal("slug", Astro.params.slug),
+    ]);
+
+  const allPosts = allPostsResp.documents.map((post) => PostSchema.parse(post));
+
+  return allPosts.map((post) => ({
+    params: { slug: post.slug ?? post.$id! },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<BlogPost {...post}>
+  <div set:html={post.content} />
+</BlogPost>
